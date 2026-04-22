@@ -1,6 +1,7 @@
 // Minimal dashboard client for Regime Trader.
 // Communicates with the FastAPI platform over REST + SSE.
 const API_BASE = "";
+let DEMO_MODE = false;
 
 const state = {
   token: sessionStorage.getItem("rt_token") || null,
@@ -170,7 +171,48 @@ function renderSettings(info, governance) {
   }
 }
 
+function demoData() {
+  return {
+    health: { trading_mode: "paper", dry_run: true, active_model: "hmm-v2.1" },
+    portfolio: {
+      equity: 100000, daily_pnl: 342.50, total_exposure_pct: 0.62,
+      peak_equity: 101200, breaker_state: "closed",
+      sector_exposure: { Technology: 0.35, "Consumer Cyclical": 0.15, "Communication Services": 0.12 },
+      positions: [
+        { symbol: "AAPL", quantity: 50, avg_entry_price: 198.45, current_price: 205.30, stop_price: 192.00, regime_at_entry: "bull_low_vol", unrealized_pnl: 342.50 },
+        { symbol: "NVDA", quantity: 25, avg_entry_price: 870.20, current_price: 885.60, stop_price: 845.00, regime_at_entry: "bull_high_vol", unrealized_pnl: 385.00 },
+        { symbol: "MSFT", quantity: 30, avg_entry_price: 420.10, current_price: 415.80, stop_price: 408.00, regime_at_entry: "bull_low_vol", unrealized_pnl: -129.00 },
+      ],
+    },
+    regime: { regime_name: "bull_low_vol", probability: 0.87, consecutive_bars: 14 },
+    freshness: { stale_data_blocked: false },
+    signals: [
+      { symbol: "SPY", strategy_name: "momentum", direction: "LONG", target_allocation_pct: 0.10, leverage: 1.0, reasoning: ["Regime: bull_low_vol", "RSI rising"] },
+      { symbol: "QQQ", strategy_name: "mean_reversion", direction: "LONG", target_allocation_pct: 0.08, leverage: 1.0, reasoning: ["Oversold bounce", "Vol contracting"] },
+    ],
+    approvals: [
+      { intent_id: "BUY 20 AMD @ MKT", approval_id: "appr-001", requested_by: "signal_engine", requested_by_type: "system" },
+    ],
+    audit: [
+      { timestamp: new Date().toISOString(), actor: "system", actor_type: "engine", action: "regime_change", resource_type: "regime", resource_id: "bull_low_vol", reason: "HMM transition" },
+      { timestamp: new Date().toISOString(), actor: "admin", actor_type: "human", action: "approve_order", resource_type: "order", resource_id: "ord-442", reason: "dashboard" },
+    ],
+    info: { trading_mode: "paper", execution_enabled: false, approval_mode: "manual" },
+    governance: { active_model_version: "hmm-v2.1", fallback_model_version: "hmm-v1.8", candidates: ["hmm-v2.2-rc1"] },
+  };
+}
+
 async function refreshOverview() {
+  if (DEMO_MODE) {
+    const d = demoData();
+    renderOverview(d);
+    renderPositions(d.portfolio);
+    renderSignals(d.signals);
+    renderApprovals(d.approvals);
+    renderAudit(d.audit);
+    renderSettings(d.info, d.governance);
+    return;
+  }
   try {
     const [health, portfolio, regime, freshness, signals, approvals, audit, info, governance] = await Promise.all([
       api("/health"),
@@ -190,7 +232,10 @@ async function refreshOverview() {
     renderAudit(audit || []);
     renderSettings(info, governance);
   } catch (err) {
-    console.warn("dashboard refresh failed", err);
+    console.warn("dashboard refresh failed, switching to demo mode", err);
+    DEMO_MODE = true;
+    setText('[data-role="engine-status"]', 'DEMO MODE - No live backend connected');
+    refreshOverview();
   }
 }
 
@@ -315,7 +360,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setAuthUi();
   initTabs();
   refreshOverview();
-  connectEvents();
+  if (!DEMO_MODE) connectEvents();
   document.getElementById("login-form").addEventListener("submit", handleLogin);
   document.addEventListener("click", handleApprovalClick);
   document.getElementById("preview-form").addEventListener("submit", handlePreviewSubmit);
