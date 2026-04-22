@@ -326,6 +326,14 @@ async function handleApprovalClick(event) {
   if (!target) return;
   const approvalId = target.dataset.id;
   const action = target.dataset.action;
+  if (DEMO_MODE) {
+    const li = target.closest("li");
+    if (li) li.remove();
+    const list = document.getElementById("approvals-list");
+    if (!list.children.length) list.innerHTML = "<li>No pending approvals</li>";
+    alert(`Order ${approvalId} ${action === "approve" ? "approved" : "rejected"} (demo)`);
+    return;
+  }
   const endpoint = action === "approve" ? "/approvals/approve" : "/approvals/reject";
   try {
     await api(endpoint, { method: "POST", body: { approval_id: approvalId, reason: "dashboard" } });
@@ -344,6 +352,11 @@ async function handlePreviewSubmit(event) {
     allocation_pct: Number(form.get("allocation_pct")),
     thesis: form.get("thesis") || "",
   };
+  if (DEMO_MODE) {
+    const qty = Math.round((100000 * payload.allocation_pct) / 450);
+    alert(`Preview ACCEPTED (demo)\n\nSymbol: ${payload.symbol}\nDirection: ${payload.direction}\nAllocation: ${(payload.allocation_pct * 100).toFixed(0)}%\nEst. quantity: ${qty} shares\nRisk check: PASSED\nThesis: ${payload.thesis || "n/a"}`);
+    return;
+  }
   try {
     const plan = await api("/orders/preview", { method: "POST", body: payload });
     alert(`Preview ${plan.status}: ${plan.rejection_reason || "ok"}`);
@@ -358,6 +371,12 @@ async function handleCloseClick(event) {
   if (!target) return;
   const symbol = target.dataset.closeSymbol;
   if (!confirm(`Close position in ${symbol}?`)) return;
+  if (DEMO_MODE) {
+    const row = target.closest("tr");
+    if (row) row.remove();
+    alert(`Position in ${symbol} closed (demo)`);
+    return;
+  }
   try {
     await api(`/positions/close?symbol=${encodeURIComponent(symbol)}`, { method: "POST" });
     refreshOverview();
