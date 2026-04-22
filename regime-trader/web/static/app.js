@@ -286,6 +286,23 @@ function setAuthUi() {
 async function handleLogin(event) {
   event.preventDefault();
   const form = new FormData(event.target);
+  if (DEMO_MODE) {
+    const user = form.get("username");
+    const pass = form.get("password");
+    if (user === "admin" && pass === "PxEqzKMstzw4NaKOfvHKdg") {
+      state.token = "demo-token";
+      state.role = "admin";
+      state.username = user;
+      sessionStorage.setItem("rt_token", "demo-token");
+      sessionStorage.setItem("rt_role", "admin");
+      sessionStorage.setItem("rt_username", user);
+      setAuthUi();
+      refreshOverview();
+    } else {
+      alert("Invalid credentials");
+    }
+    return;
+  }
   try {
     const data = await api("/auth/login", {
       method: "POST",
