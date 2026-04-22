@@ -1,0 +1,106 @@
+{
+  "records": {
+    "7f604805d0e41a4ac522cd7293fc0a2a93c08195": {
+      "idempotency_key": "7f604805d0e41a4ac522cd7293fc0a2a93c08195",
+      "intent_id": "intent-1e477f311940",
+      "actor": "admin",
+      "resource_type": "trade_intent",
+      "created_at": "2026-04-20T19:12:35.808045+00:00",
+      "status": "previewed",
+      "payload": {
+        "symbol": "SPY",
+        "direction": "LONG",
+        "allocation_pct": 0.1,
+        "intent_type": "open_position"
+      },
+      "result": {
+        "approved": true,
+        "modified": false,
+        "reason_codes": [],
+        "reason_message": "approved",
+        "risk_adjusted_size": 0.1,
+        "risk_adjusted_leverage": 1.0,
+        "plan_id": "plan-f71742b596ad",
+        "status": "approved"
+      }
+    },
+    "8ad0c26419356f395bdb538b78fd0973a43c7a25": {
+      "idempotency_key": "8ad0c26419356f395bdb538b78fd0973a43c7a25",
+      "intent_id": "intent-514b682f7647",
+      "actor": "admin",
+      "resource_type": "trade_intent",
+      "created_at": "2026-04-20T19:12:42.378007+00:00",
+      "status": "previewed",
+      "payload": {
+        "symbol": "SPY",
+        "direction": "LONG",
+        "allocation_pct": 0.07,
+        "intent_type": "open_position"
+      },
+      "result": {
+        "approved": false,
+        "modified": false,
+        "reason_codes": [
+          "duplicate_request"
+        ],
+        "reason_message": "Repeat submission within cooldown window",
+        "risk_adjusted_size": 0.0,
+        "risk_adjusted_leverage": 1.0,
+        "plan_id": "plan-4b1431851e66",
+        "status": "rejected"
+      }
+    },
+    "e98fc7bc39b46243fd97d4c715f507d9a571b9f7": {
+      "idempotency_key": "e98fc7bc39b46243fd97d4c715f507d9a571b9f7",
+      "intent_id": "intent-3f855b23f120",
+      "actor": "admin",
+      "resource_type": "trade_intent",
+      "created_at": "2026-04-20T19:13:00.555501+00:00",
+      "status": "previewed",
+      "payload": {
+        "symbol": "SPY",
+        "direction": "FLAT",
+        "allocation_pct": 0.07,
+        "intent_type": "open_position"
+      },
+      "result": {
+        "approved": false,
+        "modified": false,
+        "reason_codes": [
+          "missing_stop"
+        ],
+        "reason_message": "Every long order must carry a stop-loss.",
+        "risk_adjusted_size": 0.0,
+        "risk_adjusted_leverage": 1.0,
+        "plan_id": "plan-72c03fbb54e6",
+        "status": "rejected"
+      }
+    },
+    "9af6be9e49334ed5b5f0e5824b636f3add202580": {
+      "idempotency_key": "9af6be9e49334ed5b5f0e5824b636f3add202580",
+      "intent_id": "intent-dc028d469da3",
+      "actor": "admin",
+      "resource_type": "trade_intent",
+      "created_at": "2026-04-20T19:13:11.422193+00:00",
+      "status": "previewed",
+      "payload": {
+        "symbol": "SPY",
+        "direction": "LONG",
+        "allocation_pct": 0.09,
+        "intent_type": "open_position"
+      },
+      "result": {
+        "approved": false,
+        "modified": false,
+        "reason_codes": [
+          "duplicate_request"
+        ],
+        "reason_message": "Repeat submission within cooldown window",
+        "risk_adjusted_size": 0.0,
+        "risk_adjusted_leverage": 1.0,
+        "plan_id": "plan-d827116dfcf1",
+        "status": "rejected"
+      }
+    }
+  }
+}

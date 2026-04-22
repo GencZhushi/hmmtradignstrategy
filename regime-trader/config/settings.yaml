@@ -1,0 +1,93 @@
+# Regime Trader runtime configuration.
+# Secrets live in .env. CLI flags override values here.
+
+broker:
+  trading_mode: paper          # paper | live
+  execution_enabled: true
+  symbols: [SPY, QQQ, AAPL, MSFT, AMZN, GOOGL, NVDA, META, TSLA, AMD]
+  regime_timeframe: 1Day
+  execution_timeframe: 5Min
+  exchange_timezone: America/New_York
+
+hmm:
+  n_candidates: [3, 4, 5, 6, 7]
+  n_init: 10
+  covariance_type: full
+  min_train_bars: 504
+  stability_bars: 3
+  flicker_window: 20
+  flicker_threshold: 4
+  min_confidence: 0.55
+  zscore_window: 252
+
+strategy:
+  low_vol_allocation: 0.95
+  mid_vol_allocation_trend: 0.95
+  mid_vol_allocation_no_trend: 0.60
+  high_vol_allocation: 0.60
+  low_vol_leverage: 1.25
+  rebalance_threshold: 0.10
+  uncertainty_size_mult: 0.50
+
+risk:
+  max_risk_per_trade: 0.01
+  max_exposure: 0.80
+  max_leverage: 1.25
+  max_single_position: 0.15
+  max_concurrent: 5
+  max_daily_trades: 20
+  daily_dd_reduce: 0.02
+  daily_dd_halt: 0.03
+  weekly_dd_reduce: 0.05
+  weekly_dd_halt: 0.07
+  max_dd_from_peak: 0.10
+  max_sector_exposure: 0.30
+  correlation_reduce_threshold: 0.70
+  correlation_reject_threshold: 0.85
+  correlation_lookback_days: 60
+
+backtest:
+  slippage_pct: 0.0005
+  initial_capital: 100000
+  train_window: 504
+  test_window: 126
+  step_size: 126
+  risk_free_rate: 0.045
+
+data:
+  # provider: alpaca | csv | auto (default). 'auto' picks Alpaca when
+  # credentials are in .env, otherwise falls back to CSV / InMemory.
+  provider: auto
+  # On-disk Parquet cache so training/backtest re-runs don't refetch.
+  cache_dir: state/bars_cache
+  # Optional CSV directory override (used for backtest replay / tests).
+  data_dir: state/bars
+  # Alpaca data feed: 'iex' (free, IEX tape) or 'sip' (paid, full tape).
+  alpaca_feed: iex
+
+monitoring:
+  dashboard_refresh_seconds: 5
+  alert_rate_limit_minutes: 15
+
+governance:
+  model_registry_path: state/models
+  promotion_min_improvement_bic: 0.0
+  allow_auto_promotion: false
+
+platform:
+  api_host: 127.0.0.1
+  api_port: 8000
+  approval_mode: manual         # manual | auto_paper
+  live_arming_ttl_minutes: 15
+  storage_backend: sqlite
+  sqlite_path: state/regime_trader.db
+  state_dir: state
+  audit_dir: state/audit
+  snapshot_dir: state/snapshots
+  approval_dir: state/approvals
+  require_approval_in_paper: true
+
+agent:
+  default_permission: agent_preview
+  allow_paper_auto_execute: false
+  explain_rejections: true

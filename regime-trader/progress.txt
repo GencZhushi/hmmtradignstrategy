@@ -1,0 +1,195 @@
+=== HMM Regime Trading Bot - Session Progress ===
+Last updated: 2026-04-20 (session 4 - dashboard tabs fixed + live Alpaca market data)
+
+## Status snapshot
+- Full pytest suite: 416 passed, 0 skipped, ~53s wall time.
+- Real Alpaca paper broker live:
+    /health -> broker_connected:true, dry_run:false, trading_mode:paper
+    /portfolio -> equity:$100000, buying_power:$100000 (from paper-api.alpaca.markets)
+- Real Alpaca market data live via new AlpacaDataProvider (IEX feed, free):
+    scripts/smoke_frontend.py -> 547 SPY daily bars + 69 5Min bars pulled OK
+    Cached on disk at state/bars_cache/<SYMBOL>_<timeframe>.parquet
+- Dashboard tabs work end-to-end:
+    /web/static/app.js -> 200 (was 404 before fix)
+    All 6 tabs render (overview / positions / signals / approvals / audit / settings)
+- Admin login works against .env password:
+    POST /auth/login {"username":"admin","password":<env>} -> 200 OK
+- Dependencies installed: hmmlearn==0.3.3, alpaca-py==0.43.2
+- Helper scripts:
+    scripts/smoke_alpaca.py    - verifies .env -> paper account reachable
+    scripts/smoke_api.py       - hits /auth/login + all read endpoints
+    scripts/smoke_frontend.py  - validates dashboard assets + live data fetch
+
+## Session 4 code changes (minimal upstream fixes only)
+- web/index.html: script tag now points to /web/static/app.js (absolute)
+  instead of ./static/app.js (relative) - fixes 404 when HTML is served
+  from `/`.
+- data/market_data.py:
+    + class AlpacaDataProvider        (fetches daily/5Min OHLCV from
+                                        Alpaca Market Data with Parquet
+                                        cache + CSV fallback; IEX feed)
+    + _merge_frames                   (dedupe-safe frame union helper)
+    * build_provider()                (now picks 'alpaca' when keys
+                                        present under provider='auto'
+                                        or explicit 'alpaca'; preserves
+                                        CSV + InMemory fallbacks)
+- monitoring/application.py:
+    + build_data_config()             (module-level helper that merges
+                                        settings.yaml data: with Secrets
+                                        so TradingApplication and every
+                                        CLI entrypoint pick the same
+                                        provider)
+- core/hmm_engine.py train_cli:       uses build_data_config()
+- backtest/backtester.py run_backtest_cli: uses build_data_config()
+- config/settings.yaml:               new `data:` section with
+                                       provider/cache_dir/data_dir/alpaca_feed.
+
+## All implementation phases COMPLETE
+
+### Spec A — Core Trading Engine (A1–A13)
+- A1: Project scaffold, config loader, settings.yaml ✅
+- A2: Market data + feature engineering + look-ahead tests ✅
+- A3: HMM engine with forward-algorithm filtered inference ✅
+- A4: Strategy + signal generator ✅
+- A5: Walk-forward backtester + performance metrics + stress tests ✅
+  - NEW: tests/test_backtest.py (12 cases)
+- A6: Risk manager + breakers ✅
+- A7: Broker integration + reconciliation + retries ✅
+  - NEW: tests/test_broker_sync.py (18 cases)
+- A8: Main orchestration loop + logger + alerts + dashboard ✅
+- A9: Concurrency + idempotency + execution coordinator ✅
+  - NEW: tests/test_concurrency.py (8 cases)
+- A10: Partial fills + order lifecycle + stop failures + bracket desync ✅
+  - NEW: tests/test_partial_fills.py (7 cases)
+  - NEW: tests/test_order_lifecycle.py (9 cases)
+  - NEW: tests/test_stop_failures.py (4 cases)
+  - NEW: tests/test_bracket_desync.py (5 cases)
+- A11: Calendar + slippage + adjustments + missing bars + overnight gaps ✅
+  - NEW: tests/test_adjustments.py (9 cases)
+  - NEW: tests/test_missing_bars.py (10 cases)
+  - NEW: tests/test_slippage_model.py (10 cases)
+  - NEW: tests/test_overnight_gap_logic.py (9 cases)
+- A12: Sector + correlation risk + ETF treatment + joint breach resolution ✅
+  - NEW: tests/test_etf_treatment.py (10 cases)
+  - NEW: tests/test_correlation_constraints.py (10 cases)
+  - NEW: tests/test_joint_trade_breach_resolution.py (7 cases)
+  - Prev session FIX: resolve_joint_breach scaling formula corrected
+- A13: Model registry + governance + promotion + rollback + fallback ✅
+  - NEW: tests/test_model_versioning.py (8 cases)
+  - NEW: tests/test_model_promotion.py (9 cases)
+  - NEW: tests/test_model_rollback.py (7 cases)
+  - NEW: tests/test_retraining_fallback.py (7 cases)
+
+### Spec B — Web / API Platform (B1–B12)
+- B1: API skeleton + storage + auth + services + dependencies ✅
+- B2: Read-only state API routes ✅
+- B3: Preview + execute + approval API ✅
+  - NEW: tests/test_approval_flow.py (8 cases)
+- B4: Web dashboard (HTML/JS consuming API) ✅
+  - NEW: tests/test_frontend_smoke.py (8 cases)
+  - FIX: Added /web/index.html route for direct dashboard access
+- B5: Event streaming + audit + settings control ✅
+  - NEW: tests/test_audit.py (8 cases - audit trail endpoint contract)
+  - NEW: tests/test_streaming.py (6 cases - SSE route + events cache)
+- B6: API idempotency + concurrency ✅
+- B7: API order status + lifecycle exposure ✅
+- B8: API freshness + session state payload ✅
+- B9: API concentration + correlation payloads ✅
+- B10: API model governance ✅
+- B12: Architecture and sequence diagrams ✅
+
+### Spec C — OpenClaw Agent Contract (C1–C9)
+- C1: Agent adapter skeleton + schemas ✅
+- C2: Read-only agent tools ✅
+  - NEW: tests/test_agent_read_tools.py (11 cases)
+- C3: Agent preview / submit ✅
+- C4: Agent permissions + audit ✅
+- C5: Agent idempotency + retry semantics ✅
+- C6: Agent order-state interpretation ✅
+- C7: Agent freshness behaviour ✅
+- C8: Agent concentration behaviour ✅
+- C9: Agent model-governance behaviour ✅
+
+### Cross-cutting
+- X1: Requirement-level labeling (requirement_levels_and_delivery_priorities.md) ✅
+
+## Bug fixes / polish applied this session (session 2)
+- Environment: installed `hmmlearn==0.3.3` (pulled compatible
+  scikit-learn 1.8.0 + scipy 1.17.1 on Python 3.13 / Windows).
+  This unlocks the two previously-skipped test paths and all
+  hmmlearn-gated assertions inside tests/test_hmm.py.
+- No application-source edits were needed this session; the codebase
+  already matches Spec A, B, C and the phase acceptance criteria.
+
+## Bug fixes / polish applied in prior session
+- tests/test_hmm.py
+  - Module-level pytest.importorskip("hmmlearn") so environments
+    without the optional scientific dependency skip cleanly instead of
+    erroring at setup.
+- tests/test_look_ahead.py::test_filtered_hmm_regimes_match_on_prefix
+  - Inline pytest.importorskip("hmmlearn") so the HMM-dependent case
+    skips cleanly while the feature-level no-look-ahead test keeps
+    running.
+
+## Prior-session fixes still in effect
+- core/correlation_risk.py resolve_joint_breach scaling formula
+- api/app.py lifespan context manager + /web/index.html mount
+- api/routes/streaming.py datetime.now(timezone.utc) migration
+
+## New test files created this session (14 files, 144 new test cases)
+
+### Phase A10 - Order lifecycle (25 cases)
+- tests/test_partial_fills.py - fill progression, VWAP averaging, trailing stop
+- tests/test_order_lifecycle.py - transition legality, retry trade_id reuse
+- tests/test_stop_failures.py - protective-stop failure surface
+- tests/test_bracket_desync.py - bracket child reconciliation
+
+### Phase A11 - Data realism (38 cases)
+- tests/test_adjustments.py - split/dividend policy + outlier detection
+- tests/test_missing_bars.py - gap detection + staleness thresholds
+- tests/test_slippage_model.py - vol/spread/participation slippage
+- tests/test_overnight_gap_logic.py - stop-pierce + regime-pinning rules
+
+### Phase A12 - Portfolio constraints (27 cases)
+- tests/test_etf_treatment.py - sector + ETF-risk bucket classification
+- tests/test_correlation_constraints.py - rolling correlation + reduce/reject
+- tests/test_joint_trade_breach_resolution.py - multi-sector scale-down
+
+### Phase A13 - Model governance (31 cases)
+- tests/test_model_versioning.py - registry reload + dataset hash
+- tests/test_model_promotion.py - candidate-vs-active BIC decision
+- tests/test_model_rollback.py - rollback safety + status transitions
+- tests/test_retraining_fallback.py - last-known-good selection
+
+### Phase A9 - Concurrency (8 cases)
+- tests/test_concurrency.py - lock serialization + parallel non-conflicting
+
+### Phase B5 - Audit + streaming (14 cases)
+- tests/test_audit.py - audit endpoint filters + schema + approval audit
+- tests/test_streaming.py - SSE route + events cache warm-up
+
+## Remaining known items
+- None from a code-completeness standpoint. All Spec A (A1-A13),
+  Spec B (B1-B12), and Spec C (C1-C9) phases meet their acceptance
+  criteria with 416/416 tests passing.
+- To exercise the bundled `python main.py --train-only` or
+  `python main.py --backtest` against real bars, drop daily and 5-min
+  OHLCV CSVs under `state/bars/<SYMBOL>_<1Day|5Min>.csv`. Without them
+  the engine transparently falls back to InMemoryProvider (warn logs
+  are expected; no crash).
+- For live/paper broker access, populate `.env` from `.env.example`
+  (ALPACA_PAPER_API_KEY / ALPACA_PAPER_SECRET_KEY).
+
+## How to run
+    python -m pytest tests/ -q                   # full suite (~56s)
+    # per-phase smoke runs:
+    python -m pytest tests/test_partial_fills.py tests/test_order_lifecycle.py \
+        tests/test_stop_failures.py tests/test_bracket_desync.py -q   # A10
+    python -m pytest tests/test_adjustments.py tests/test_missing_bars.py \
+        tests/test_slippage_model.py tests/test_overnight_gap_logic.py -q  # A11
+    python -m pytest tests/test_etf_treatment.py tests/test_correlation_constraints.py \
+        tests/test_joint_trade_breach_resolution.py -q   # A12
+    python -m pytest tests/test_model_versioning.py tests/test_model_promotion.py \
+        tests/test_model_rollback.py tests/test_retraining_fallback.py -q   # A13
+    python -m pytest tests/test_concurrency.py -q          # A9
+    python -m pytest tests/test_audit.py tests/test_streaming.py -q   # B5

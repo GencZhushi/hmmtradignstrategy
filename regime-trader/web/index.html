@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en" class="h-full bg-slate-950">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Regime Trader Dashboard</title>
+    <link rel="preconnect" href="https://cdn.tailwindcss.com" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = { darkMode: "class" };
+    </script>
+    <script type="module" src="/web/static/app.js" defer></script>
+  </head>
+  <body class="h-full text-slate-100 font-sans antialiased">
+    <div id="root" class="min-h-full">
+      <header class="border-b border-slate-800 bg-slate-900/80 sticky top-0 z-40 backdrop-blur">
+        <div class="mx-auto max-w-7xl px-6 py-4 flex items-center justify-between gap-6">
+          <div>
+            <h1 class="text-xl font-semibold tracking-tight">Regime Trader</h1>
+            <p class="text-xs text-slate-400" data-role="engine-status">Initializing engine status...</p>
+          </div>
+          <nav class="flex gap-2 text-xs">
+            <button class="tab px-3 py-1 rounded-md border border-slate-700 bg-slate-800" data-tab="overview">Overview</button>
+            <button class="tab px-3 py-1 rounded-md border border-slate-700" data-tab="positions">Positions</button>
+            <button class="tab px-3 py-1 rounded-md border border-slate-700" data-tab="signals">Signals</button>
+            <button class="tab px-3 py-1 rounded-md border border-slate-700" data-tab="approvals">Approvals</button>
+            <button class="tab px-3 py-1 rounded-md border border-slate-700" data-tab="audit">Audit</button>
+            <button class="tab px-3 py-1 rounded-md border border-slate-700" data-tab="settings">Settings</button>
+          </nav>
+          <div class="flex items-center gap-3" data-role="auth-slot">
+            <form id="login-form" class="flex items-center gap-2 text-xs">
+              <input class="bg-slate-800 rounded px-2 py-1 border border-slate-700" name="username" placeholder="user" value="admin" />
+              <input class="bg-slate-800 rounded px-2 py-1 border border-slate-700" name="password" placeholder="password" type="password" />
+              <button type="submit" class="px-3 py-1 bg-emerald-500/80 rounded text-slate-950 font-semibold">Sign in</button>
+            </form>
+            <div id="auth-identity" class="hidden text-xs text-slate-300"></div>
+          </div>
+        </div>
+      </header>
+
+      <main class="mx-auto max-w-7xl px-6 py-8 space-y-8">
+        <section data-panel="overview" class="space-y-6">
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <article class="card"><h2>Regime</h2><p data-role="regime-name">-</p><p class="text-xs text-slate-400" data-role="regime-probability"></p></article>
+            <article class="card"><h2>Equity</h2><p data-role="equity">-</p><p class="text-xs text-slate-400" data-role="daily-pnl"></p></article>
+            <article class="card"><h2>Exposure</h2><p data-role="exposure">-</p><p class="text-xs text-slate-400" data-role="leverage"></p></article>
+            <article class="card"><h2>Breaker</h2><p data-role="breaker">-</p><p class="text-xs text-slate-400" data-role="stale-flag"></p></article>
+          </div>
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <article class="card-large">
+              <h2 class="text-lg mb-4">Active alerts</h2>
+              <ul id="alerts" class="space-y-2 text-sm text-slate-300"><li>No active alerts</li></ul>
+            </article>
+            <article class="card-large">
+              <h2 class="text-lg mb-4">Sector exposure</h2>
+              <ul id="sector-list" class="space-y-1 text-sm text-slate-300"><li>No open positions</li></ul>
+            </article>
+          </div>
+        </section>
+
+        <section data-panel="positions" class="space-y-6 hidden">
+          <article class="card-large overflow-x-auto">
+            <h2 class="text-lg mb-4">Open Positions</h2>
+            <table class="w-full text-sm">
+              <thead class="text-left text-slate-400"><tr><th>Symbol</th><th>Qty</th><th>Entry</th><th>Mark</th><th>Stop</th><th>Regime</th><th>Unrealized</th><th></th></tr></thead>
+              <tbody id="positions-body"></tbody>
+            </table>
+          </article>
+        </section>
+
+        <section data-panel="signals" class="space-y-6 hidden">
+          <article class="card-large">
+            <h2 class="text-lg mb-4">Latest Signals</h2>
+            <ul id="signals-list" class="space-y-3 text-sm text-slate-300"></ul>
+            <form id="preview-form" class="mt-6 grid grid-cols-1 md:grid-cols-5 gap-2 text-sm">
+              <input name="symbol" placeholder="Symbol" class="input" required value="SPY" />
+              <select name="direction" class="input"><option value="LONG">LONG</option><option value="FLAT">FLAT</option></select>
+              <input name="allocation_pct" type="number" step="0.01" placeholder="Allocation %" class="input" required value="0.10" />
+              <input name="thesis" placeholder="Thesis" class="input md:col-span-1" />
+              <button type="submit" class="btn-primary">Preview</button>
+            </form>
+          </article>
+        </section>
+
+        <section data-panel="approvals" class="space-y-6 hidden">
+          <article class="card-large">
+            <h2 class="text-lg mb-4">Pending approvals</h2>
+            <ul id="approvals-list" class="space-y-3 text-sm text-slate-300"><li>No pending approvals</li></ul>
+          </article>
+        </section>
+
+        <section data-panel="audit" class="space-y-6 hidden">
+          <article class="card-large">
+            <h2 class="text-lg mb-4">Audit trail</h2>
+            <ul id="audit-list" class="space-y-1 text-xs text-slate-300 font-mono max-h-[400px] overflow-y-auto"></ul>
+          </article>
+        </section>
+
+        <section data-panel="settings" class="space-y-6 hidden">
+          <article class="card-large">
+            <h2 class="text-lg mb-2">Settings</h2>
+            <p class="text-sm text-slate-400 mb-4">Only admins can flip modes. Approval policy changes are audited.</p>
+            <dl id="settings-grid" class="grid grid-cols-2 gap-y-2 text-sm"></dl>
+          </article>
+          <article class="card-large">
+            <h2 class="text-lg mb-2">Model governance</h2>
+            <div id="governance" class="text-sm text-slate-300"></div>
+          </article>
+        </section>
+      </main>
+    </div>
+    <style>
+      .card { background-color: rgb(15 23 42); border: 1px solid rgb(30 41 59); border-radius: 0.5rem; padding: 1rem; box-shadow: 0 1px 2px rgba(0,0,0,.3); }
+      .card h2 { font-size: .75rem; text-transform: uppercase; letter-spacing: .08em; color: rgb(148 163 184); }
+      .card p { margin-top: .25rem; font-size: 1.25rem; font-weight: 600; }
+      .card-large { background-color: rgb(15 23 42); border: 1px solid rgb(30 41 59); border-radius: 0.5rem; padding: 1.5rem; box-shadow: 0 1px 2px rgba(0,0,0,.3); }
+      .input { background-color: rgb(30 41 59); border: 1px solid rgb(51 65 85); border-radius: .375rem; padding: .5rem .75rem; color: inherit; }
+      .input:focus { outline: none; box-shadow: 0 0 0 2px rgb(16 185 129); }
+      .btn-primary { background-color: rgb(16 185 129); border-radius: .375rem; padding: .5rem .75rem; color: rgb(2 6 23); font-weight: 600; cursor: pointer; border: none; }
+      .btn-primary:hover { background-color: rgb(5 150 105); }
+      .tab.active { background-color: rgb(16 185 129); color: rgb(2 6 23); border-color: rgb(52 211 153); }
+    </style>
+  </body>
+</html>
