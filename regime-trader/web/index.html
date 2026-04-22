@@ -14,33 +14,35 @@
   <body class="h-full text-slate-100 font-sans antialiased">
     <div id="root" class="min-h-full">
       <header class="border-b border-slate-800 bg-slate-900/80 sticky top-0 z-40 backdrop-blur">
-        <div class="mx-auto max-w-7xl px-6 py-4 flex items-center justify-between gap-6">
-          <div>
-            <h1 class="text-xl font-semibold tracking-tight">Regime Trader</h1>
-            <p class="text-xs text-slate-400" data-role="engine-status">Initializing engine status...</p>
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 py-3 sm:py-4">
+          <div class="flex items-center justify-between gap-3">
+            <div class="min-w-0">
+              <h1 class="text-lg sm:text-xl font-semibold tracking-tight truncate">Regime Trader</h1>
+              <p class="text-[10px] sm:text-xs text-slate-400 truncate" data-role="engine-status">Initializing engine status...</p>
+            </div>
+            <div class="flex items-center gap-2 shrink-0" data-role="auth-slot">
+              <form id="login-form" class="flex items-center gap-1.5 sm:gap-2 text-xs">
+                <input class="bg-slate-800 rounded px-2 py-1.5 border border-slate-700 w-16 sm:w-auto text-xs" name="username" placeholder="user" value="admin" />
+                <input class="bg-slate-800 rounded px-2 py-1.5 border border-slate-700 w-20 sm:w-auto text-xs" name="password" placeholder="password" type="password" />
+                <button type="submit" class="px-2.5 sm:px-3 py-1.5 bg-emerald-500/80 rounded text-slate-950 font-semibold text-xs whitespace-nowrap">Sign in</button>
+              </form>
+              <div id="auth-identity" class="hidden text-xs text-slate-300 whitespace-nowrap"></div>
+            </div>
           </div>
-          <nav class="flex gap-2 text-xs">
-            <button class="tab px-3 py-1 rounded-md border border-slate-700 bg-slate-800" data-tab="overview">Overview</button>
-            <button class="tab px-3 py-1 rounded-md border border-slate-700" data-tab="positions">Positions</button>
-            <button class="tab px-3 py-1 rounded-md border border-slate-700" data-tab="signals">Signals</button>
-            <button class="tab px-3 py-1 rounded-md border border-slate-700" data-tab="approvals">Approvals</button>
-            <button class="tab px-3 py-1 rounded-md border border-slate-700" data-tab="audit">Audit</button>
-            <button class="tab px-3 py-1 rounded-md border border-slate-700" data-tab="settings">Settings</button>
+          <nav class="flex gap-1.5 sm:gap-2 text-xs mt-3 overflow-x-auto pb-1 -mb-1 scrollbar-hide">
+            <button class="tab px-2.5 sm:px-3 py-1.5 rounded-md border border-slate-700 bg-slate-800 whitespace-nowrap shrink-0" data-tab="overview">Overview</button>
+            <button class="tab px-2.5 sm:px-3 py-1.5 rounded-md border border-slate-700 whitespace-nowrap shrink-0" data-tab="positions">Positions</button>
+            <button class="tab px-2.5 sm:px-3 py-1.5 rounded-md border border-slate-700 whitespace-nowrap shrink-0" data-tab="signals">Signals</button>
+            <button class="tab px-2.5 sm:px-3 py-1.5 rounded-md border border-slate-700 whitespace-nowrap shrink-0" data-tab="approvals">Approvals</button>
+            <button class="tab px-2.5 sm:px-3 py-1.5 rounded-md border border-slate-700 whitespace-nowrap shrink-0" data-tab="audit">Audit</button>
+            <button class="tab px-2.5 sm:px-3 py-1.5 rounded-md border border-slate-700 whitespace-nowrap shrink-0" data-tab="settings">Settings</button>
           </nav>
-          <div class="flex items-center gap-3" data-role="auth-slot">
-            <form id="login-form" class="flex items-center gap-2 text-xs">
-              <input class="bg-slate-800 rounded px-2 py-1 border border-slate-700" name="username" placeholder="user" value="admin" />
-              <input class="bg-slate-800 rounded px-2 py-1 border border-slate-700" name="password" placeholder="password" type="password" />
-              <button type="submit" class="px-3 py-1 bg-emerald-500/80 rounded text-slate-950 font-semibold">Sign in</button>
-            </form>
-            <div id="auth-identity" class="hidden text-xs text-slate-300"></div>
-          </div>
         </div>
       </header>
 
-      <main class="mx-auto max-w-7xl px-6 py-8 space-y-8">
+      <main class="mx-auto max-w-7xl px-4 sm:px-6 py-4 sm:py-8 space-y-6 sm:space-y-8">
         <section data-panel="overview" class="space-y-6">
-          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
             <article class="card"><h2>Regime</h2><p data-role="regime-name">-</p><p class="text-xs text-slate-400" data-role="regime-probability"></p></article>
             <article class="card"><h2>Equity</h2><p data-role="equity">-</p><p class="text-xs text-slate-400" data-role="daily-pnl"></p></article>
             <article class="card"><h2>Exposure</h2><p data-role="exposure">-</p><p class="text-xs text-slate-400" data-role="leverage"></p></article>
@@ -61,8 +63,8 @@
         <section data-panel="positions" class="space-y-6 hidden">
           <article class="card-large overflow-x-auto">
             <h2 class="text-lg mb-4">Open Positions</h2>
-            <table class="w-full text-sm">
-              <thead class="text-left text-slate-400"><tr><th>Symbol</th><th>Qty</th><th>Entry</th><th>Mark</th><th>Stop</th><th>Regime</th><th>Unrealized</th><th></th></tr></thead>
+            <table class="w-full text-xs sm:text-sm min-w-[600px]">
+              <thead class="text-left text-slate-400"><tr><th class="py-2 pr-2">Symbol</th><th class="py-2 pr-2">Qty</th><th class="py-2 pr-2">Entry</th><th class="py-2 pr-2">Mark</th><th class="py-2 pr-2">Stop</th><th class="py-2 pr-2">Regime</th><th class="py-2 pr-2">Unrealized</th><th class="py-2"></th></tr></thead>
               <tbody id="positions-body"></tbody>
             </table>
           </article>
@@ -72,12 +74,12 @@
           <article class="card-large">
             <h2 class="text-lg mb-4">Latest Signals</h2>
             <ul id="signals-list" class="space-y-3 text-sm text-slate-300"></ul>
-            <form id="preview-form" class="mt-6 grid grid-cols-1 md:grid-cols-5 gap-2 text-sm">
+            <form id="preview-form" class="mt-6 grid grid-cols-2 sm:grid-cols-5 gap-2 text-sm">
               <input name="symbol" placeholder="Symbol" class="input" required value="SPY" />
               <select name="direction" class="input"><option value="LONG">LONG</option><option value="FLAT">FLAT</option></select>
               <input name="allocation_pct" type="number" step="0.01" placeholder="Allocation %" class="input" required value="0.10" />
-              <input name="thesis" placeholder="Thesis" class="input md:col-span-1" />
-              <button type="submit" class="btn-primary">Preview</button>
+              <input name="thesis" placeholder="Thesis" class="input col-span-2 sm:col-span-1" />
+              <button type="submit" class="btn-primary col-span-2 sm:col-span-1">Preview</button>
             </form>
           </article>
         </section>
@@ -110,15 +112,22 @@
       </main>
     </div>
     <style>
-      .card { background-color: rgb(15 23 42); border: 1px solid rgb(30 41 59); border-radius: 0.5rem; padding: 1rem; box-shadow: 0 1px 2px rgba(0,0,0,.3); }
-      .card h2 { font-size: .75rem; text-transform: uppercase; letter-spacing: .08em; color: rgb(148 163 184); }
-      .card p { margin-top: .25rem; font-size: 1.25rem; font-weight: 600; }
-      .card-large { background-color: rgb(15 23 42); border: 1px solid rgb(30 41 59); border-radius: 0.5rem; padding: 1.5rem; box-shadow: 0 1px 2px rgba(0,0,0,.3); }
-      .input { background-color: rgb(30 41 59); border: 1px solid rgb(51 65 85); border-radius: .375rem; padding: .5rem .75rem; color: inherit; }
+      .card { background-color: rgb(15 23 42); border: 1px solid rgb(30 41 59); border-radius: 0.5rem; padding: 0.75rem; box-shadow: 0 1px 2px rgba(0,0,0,.3); }
+      @media (min-width: 640px) { .card { padding: 1rem; } }
+      .card h2 { font-size: .65rem; text-transform: uppercase; letter-spacing: .08em; color: rgb(148 163 184); }
+      @media (min-width: 640px) { .card h2 { font-size: .75rem; } }
+      .card p { margin-top: .15rem; font-size: 1rem; font-weight: 600; }
+      @media (min-width: 640px) { .card p { font-size: 1.25rem; margin-top: .25rem; } }
+      .card-large { background-color: rgb(15 23 42); border: 1px solid rgb(30 41 59); border-radius: 0.5rem; padding: 1rem; box-shadow: 0 1px 2px rgba(0,0,0,.3); }
+      @media (min-width: 640px) { .card-large { padding: 1.5rem; } }
+      .input { background-color: rgb(30 41 59); border: 1px solid rgb(51 65 85); border-radius: .375rem; padding: .5rem .75rem; color: inherit; width: 100%; font-size: 14px; }
       .input:focus { outline: none; box-shadow: 0 0 0 2px rgb(16 185 129); }
-      .btn-primary { background-color: rgb(16 185 129); border-radius: .375rem; padding: .5rem .75rem; color: rgb(2 6 23); font-weight: 600; cursor: pointer; border: none; }
+      .btn-primary { background-color: rgb(16 185 129); border-radius: .375rem; padding: .625rem .75rem; color: rgb(2 6 23); font-weight: 600; cursor: pointer; border: none; font-size: 14px; }
       .btn-primary:hover { background-color: rgb(5 150 105); }
       .tab.active { background-color: rgb(16 185 129); color: rgb(2 6 23); border-color: rgb(52 211 153); }
+      .scrollbar-hide::-webkit-scrollbar { display: none; }
+      .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+      * { -webkit-tap-highlight-color: transparent; }
     </style>
   </body>
 </html>
